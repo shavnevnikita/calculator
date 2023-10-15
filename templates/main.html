@@ -1,0 +1,53 @@
+<html>
+<h1>Шавнев Никита Михайлович, 4 курс, 4 группа, 2023</h1>
+<br/>
+<img src="static/super.gif" width="30%">
+<br/>
+<br/>
+<input id="a"/>
+<select id="op">
+  <option name="+">+</option>
+  <option name="-">-</option>
+</select>
+<input id="b"/>
+<button id="calculate" disabled>=</button>
+<label id="result"></label>
+</html>
+
+<script>
+function check(e) {
+    const regex = /^-?\d{1,13}((\.|,)\d{1,6})?$/
+    const value = e.target.value
+    if (!regex.test(value)) {
+        e.target.style.color = "red"
+        document.getElementById("calculate").disabled = true;
+    } else {
+        e.target.style.color = "black"
+        if (document.getElementById("a").style.color == document.getElementById("b").style.color) {
+            document.getElementById("calculate").disabled = false;
+        }
+    } 
+}
+
+function calculate() {
+    fetch("http://localhost:8080/calculate", 
+    {
+        method: "POST", 
+        headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            a: document.getElementById("a").value,
+            b: document.getElementById("b").value,
+            op: document.getElementById("op").value,
+        })
+    })
+    .then(response => response.json())
+    .then(data => document.getElementById("result").innerText = data["result"])
+}
+
+document.getElementById("calculate").addEventListener("click", calculate)
+document.getElementById("a").addEventListener("input", check)
+document.getElementById("b").addEventListener("input", check)
+</script>
