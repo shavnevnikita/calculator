@@ -1,36 +1,60 @@
 <html>
 <h1>Шавнев Никита Михайлович, 4 курс, 4 группа, 2023</h1>
-<br/>
+<br>
 <img src="static/super.gif" width="30%">
-<br/>
-<br/>
+<br>
+<br>
 <input id="a"/>
 <select id="op">
   <option name="+">+</option>
   <option name="-">-</option>
+  <option name="*">*</option>
+  <option name="/">/</option>
 </select>
 <input id="b"/>
 <button id="calculate" disabled>=</button>
 <label id="result"></label>
+<br>
+<label id="error"></label>
 </html>
 
 <script>
-function check(e) {
-    const regex = /^-?\d{1,13}((\.|,)\d{1,6})?$/
-    const value = e.target.value
-    if (!regex.test(value)) {
-        e.target.style.color = "red"
+function isZero(val) {
+    const regex = /^-?((0{2,3} ?(0{3} ?){0,3})|(0 ?(0{3} ?){0,4}))((\.|,)0{1,6})?$/
+    return regex.test(val)
+}
+
+function checkVal(val) {
+    const regex = /^-?((\d{2,3} ?(\d{3} ?){0,3})|(\d ?(\d{3} ?){0,4}))((\.|,)\d{1,6})?$/
+    return regex.test(val)
+}
+
+function check() {
+    let errorMsg = ""
+    document.getElementById("calculate").disabled = false;
+    document.getElementById("b").style.color = "black"
+    document.getElementById("a").style.color = "black"
+    if (!checkVal(document.getElementById("a").value)) {
+        document.getElementById("a").style.color = "red"
+        errorMsg += "first operand is not number! "
         document.getElementById("calculate").disabled = true;
-    } else {
-        e.target.style.color = "black"
-        if (document.getElementById("a").style.color == document.getElementById("b").style.color) {
-            document.getElementById("calculate").disabled = false;
-        }
-    } 
+    }
+    if (!checkVal(document.getElementById("b").value)) {
+        document.getElementById("b").style.color = "red"
+        errorMsg += "second operand is not number! "
+        document.getElementById("calculate").disabled = true;
+    }
+    if ((document.getElementById("op").value == "/") &&
+        (isZero(document.getElementById("b").value))) {
+        document.getElementById("b").style.color = "red"
+        errorMsg += "cannot divide by zero!"
+        document.getElementById("calculate").disabled = true;
+    }
+    document.getElementById("error").innerText = errorMsg;
 }
 
 function calculate() {
-    fetch("http://localhost:8080/calculate", 
+    fetch("/calculate", 
     {
         method: "POST", 
         headers: {
@@ -47,6 +71,7 @@ function calculate() {
     .then(data => document.getElementById("result").innerText = data["result"])
 }
 
+check()
 document.getElementById("calculate").addEventListener("click", calculate)
 document.getElementById("a").addEventListener("input", check)
 document.getElementById("b").addEventListener("input", check)
